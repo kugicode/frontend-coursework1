@@ -92,6 +92,7 @@ const sortedLessons = computed(() => {
         <button v-on:click="sortBy = 'spaces'">Sort by Spaces available</button>
         <button v-on:click="sortDirection = 'ascending'">Sort ascending</button>
         <button v-on:click="sortDirection = 'descending'">Sort descending</button>
+        <button></button>
 
 
         <span v-for="lesson in sortedLessons" :key="lesson.subject">
