@@ -1,17 +1,16 @@
-// vite.config.js
 import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
+// Removed vueDevTools import as it's not needed for production build
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  // **<-- Add this line to fix the GitHub Pages path!**
+  // **CRITICAL FIX: Sets the base path for assets to the GitHub repo name**
   base: '/frontend-coursework1/',
   plugins: [
     vue(),
-    vueDevTools(),
+    // viteDevTools() removed - not needed for deployment
   ],
   resolve: {
     alias: {
