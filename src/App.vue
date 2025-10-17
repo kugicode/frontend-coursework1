@@ -54,7 +54,7 @@ const lessons = ref([{
     },
         { 
     subject: "Art and Design",
-    location: "centra london",
+    location: "central london",
     price: 75,
     spaces: 5,
     icon: "fa-solid fa-book-atlas"
@@ -81,6 +81,12 @@ const lessons = ref([{
     icon: "fa-solid fa-kaaba"
     },
 ]  )
+
+
+const click = () => {
+  console.log("click!")
+  alert("Order submitted!");
+}
 
 const remove = (lesson, index) => {
   cart.value.splice(index ,1)
@@ -160,14 +166,16 @@ return lessonsCopy
 </div>
 
 <div v-else>
+  <h2>Checkout Page!</h2>
   <h4>Shopping cart: </h4>
-  <p v-for="(items, index) in cart">
-    {{ items.subject }}
-   <button v-on:click="remove(items, index)">delete</button>
+  <p v-for="(lesson, index) in cart">
+    <b>Subject: </b>{{ lesson.subject }} <br>
+    <b>Location: </b> {{ lesson.location }} <br>
+    <b>Price: </b> {{ lesson.price }}
+   <button v-on:click="remove(lesson, index)">delete</button>
   </p>
-<h2>Checkout Page!</h2>
+  <button v-on:click="click" >CheckOut! <i class="fa-solid fa-cart-shopping"></i></button> 
 </div>
-
 
 </template>
 
