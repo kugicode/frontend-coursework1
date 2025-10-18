@@ -8,6 +8,7 @@ const sortDirection = ref('ascending');
 const showProduct = ref(true); // Changed 'true' string to boolean true
 const customerName = ref('');
 const customerPhone = ref('');
+const search = ref('');
 
 const lessons = ref([
     { subject: "Maths", location: "London", price: 100, spaces: 5, icon: "fa-solid fa-calculator" },
@@ -76,7 +77,7 @@ const sortedLessons = computed(() => {
 
 const isFormValid = computed(() => {
  
-    const nameRegex = /^[a-zA-Z\s\-]+$/;
+    const nameRegex = /^[a-zA-Z]+$/;
 
  const phoneRegex = /^[0-9]+$/;
 
@@ -85,6 +86,26 @@ const isFormValid = computed(() => {
 
  return nameIsValid && phoneIsValid && cart.value.length > 0;
 })
+
+const filteredLessons = computed(() => {
+
+const lessonsToFilter = sortedLessons.value;
+const searched = search.value.toLowerCase().trim();
+
+if (!searched){
+    return lessonsToFilter;
+}
+
+return lessonsToFilter.filter(lesson => {
+return( 
+    lesson.subject.toLowerCase().includes(searched) ||
+    lesson.location.toLowerCase().includes(searched) ||
+    String(lesson.price).includes(searched) ||
+    String(lesson.spaces).includes(searched)
+)
+});
+
+});
 
 </script>
 
@@ -97,6 +118,7 @@ const isFormValid = computed(() => {
 
     <button v-if="itemsInTheCart > 0" v-on:click="changePage">Shopping cart: {{ itemsInTheCart }}</button>
     <button v-else-if="itemsInTheCart === 0" disabled>Shopping cart: {{ itemsInTheCart }}</button>
+    <p>Search: <input type="text" v-model="search"></p>
     <p></p>
     <div v-if="showProduct">
         <button v-on:click="sortBy = 'subject'">Sort by subject</button>
@@ -107,7 +129,7 @@ const isFormValid = computed(() => {
         <button v-on:click="sortDirection = 'descending'">Sort descending</button>
 
 
-        <span v-for="lesson in sortedLessons" :key="lesson.subject">
+        <span v-for="lesson in filteredLessons" :key="lesson.subject">
             <p></p>
             <span>Subject: {{ lesson.subject }}</span>
             <br>
@@ -119,7 +141,6 @@ const isFormValid = computed(() => {
             <i v-bind:class="lesson.icon"></i>
 
             <button v-on:click="addToCart(lesson)" :disabled="lesson.spaces === 0">Add to cart</button>
-
         </span>
     </div>
 
