@@ -6,6 +6,8 @@ const cart = ref([]);
 const sortBy = ref('subject');
 const sortDirection = ref('ascending');
 const showProduct = ref(true); // Changed 'true' string to boolean true
+const customerName = ref('');
+const customerPhone = ref('');
 
 const lessons = ref([
     { subject: "Maths", location: "London", price: 100, spaces: 5, icon: "fa-solid fa-calculator" },
@@ -19,7 +21,6 @@ const lessons = ref([
     { subject: "Music", location: "Edgware", price: 55, spaces: 5, icon: "fa-solid fa-music" },
     { subject: "Religious studies", location: "hendon", price: 44, spaces: 5, icon: "fa-solid fa-kaaba" },
 ]);
-
 
 const checkoutOrder = () => {
     console.log("click!")
@@ -73,6 +74,18 @@ const sortedLessons = computed(() => {
     return lessonsCopy
 })
 
+const isFormValid = computed(() => {
+ 
+    const nameRegex = /^[a-zA-Z\s\-]+$/;
+
+ const phoneRegex = /^[0-9]+$/;
+
+ const nameIsValid = nameRegex.test(customerName.value.trim());
+ const phoneIsValid = phoneRegex.test(customerPhone.value.trim());
+
+ return nameIsValid && phoneIsValid && cart.value.length > 0;
+})
+
 </script>
 
 
@@ -92,7 +105,6 @@ const sortedLessons = computed(() => {
         <button v-on:click="sortBy = 'spaces'">Sort by Spaces available</button>
         <button v-on:click="sortDirection = 'ascending'">Sort ascending</button>
         <button v-on:click="sortDirection = 'descending'">Sort descending</button>
-        <button></button>
 
 
         <span v-for="lesson in sortedLessons" :key="lesson.subject">
@@ -120,7 +132,9 @@ const sortedLessons = computed(() => {
             <b>Price: </b> {{ lesson.price }}
             <button v-on:click="remove(lesson, index)">delete</button>
         </p>
-        <button v-on:click="checkoutOrder">CheckOut! <i class="fa-solid fa-cart-shopping"></i></button>
+        <p>Name: <input type="text" v-model="customerName"></p>
+        <p>Phone: <input type="text" v-model="customerPhone"></p>
+        <button v-on:click="checkoutOrder" :disabled="!isFormValid">CheckOut! <i class="fa-solid fa-cart-shopping"></i></button>
     </div>
 
 </template>
