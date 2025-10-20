@@ -56,19 +56,19 @@ const itemsInTheCart = computed(() => { // this computed function returns the nu
 })
 
 const sortedLessons = computed(() => {
-    const lessonsCopy = [...lessons.value];
+    const lessonsCopy = [...lessons.value]; //uses spread operator to copy the lessons array so we don't change the original array
 
-    lessonsCopy.sort((a, b) => {
+    lessonsCopy.sort((a, b) => { // sort is a built in function that allows you to sort values
 
         let comparison = 0;
 
         if (sortBy.value === 'subject' || sortBy.value === 'location') {
-            comparison = a[sortBy.value].localeCompare(b[sortBy.value]);
+            comparison = a[sortBy.value].localeCompare(b[sortBy.value]); //if sortBy value is subject or location then i'm using localeComapre to compare alphabets!
         }
         else {
-            comparison = a[sortBy.value] - b[sortBy.value];
+            comparison = a[sortBy.value] - b[sortBy.value]; //else if it's anything else which is price or space which are numbers compare them 
         }
-        return sortDirection.value === 'descending' ? comparison * -1 : comparison;
+        return sortDirection.value === 'descending' ? comparison * -1 : comparison; //iternary operator that checks if the value is ascending or descending!
 
     });
 
@@ -77,14 +77,14 @@ const sortedLessons = computed(() => {
 
 const isFormValid = computed(() => {
  
-    const nameRegex = /^[a-zA-Z]+$/;
+    const nameRegex = /^[a-zA-Z]+$/; //checks if there is a-z or capitalized alphabets!
 
- const phoneRegex = /^[0-9]+$/;
+ const phoneRegex = /^[0-9]+$/; //checks only 0-9 numbers!
 
  const nameIsValid = nameRegex.test(customerName.value.trim());
  const phoneIsValid = phoneRegex.test(customerPhone.value.trim());
 
- return nameIsValid && phoneIsValid && cart.value.length > 0;
+ return nameIsValid && phoneIsValid && cart.value.length > 0; // if all these are true the the function returns true!
 })
 
 const filteredLessons = computed(() => {
@@ -171,7 +171,7 @@ return(
         <div id="input-forms">
         <p>Name: <input type="text" v-model="customerName"></p>
         <p>Phone: <input type="text" v-model="customerPhone"></p>
-        <button v-on:click="checkoutOrder" :disabled="!isFormValid">CheckOut! <i class="fa-solid fa-cart-shopping"></i></button>
+        <button id="checkoutbutn" v-on:click="checkoutOrder" :disabled="!isFormValid">CheckOut! <i class="fa-solid fa-cart-shopping"></i></button>
         </div>
     </div>
 
@@ -194,7 +194,7 @@ text-align: center;
 
 #butnCart{
     border: none;
-    border-radius: 10px;
+    border-radius: 5px;
     padding: 5px;
     background-color: aqua;
 }
@@ -203,6 +203,11 @@ text-align: center;
 #butnCart:hover{
 background-color: rgb(0, 165, 165);
 cursor: pointer;
+}
+
+#butnCart:active{
+    background-color: aqua;
+    transform: translateY(2px);
 }
 
 
@@ -236,6 +241,11 @@ cursor: pointer;
  cursor: pointer;
 }
 
+#cartbutn:active{
+     background-color: aquamarine;
+     transform: translateY(2px);
+}
+
 #icons{
     font-size: 32px;
     color: brown;
@@ -260,8 +270,10 @@ h4{
 
 #checkCart{
  text-align: center;
- background-color: azure;
- border: 2px solid black;
+ background-color: bisque;
+ border: 1px solid black;
+ border-radius: 4px;
+ padding: 10px 0px;
 }
 
 #shoppingCart-container{
@@ -290,10 +302,32 @@ h4{
     cursor: pointer;
 }
 
+#deletebutn:active{
+     background-color: rgb(255, 111, 111);
+     transform: translateY(2px);
+}
+
 #input-forms{
     text-align: center;
 }
 
+#checkoutbutn{
+    border: none;
+    padding: 6px 8px;
+    border-radius: 4px;
+    background-color: rgb(255, 226, 60);
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+#checkoutbutn:hover{
+background-color: rgb(178, 157, 42);
+cursor: pointer;
+}
+
+#checkoutbutn:active{
+background-color: rgb(255, 226, 60);
+transform: translateY(2px);
+}
 
 
 </style>
