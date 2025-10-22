@@ -120,7 +120,8 @@ return(
     <button id="butnCart" v-else-if="itemsInTheCart === 0" disabled>Shopping cart: {{ itemsInTheCart }}</button>
     
     </div>
-   <div id="sort" v-if="showProduct">
+   <div v-if="showProduct">
+    <div id = "sort">
     <p>Search: <input id="searchinput" type="text" v-model="search"></p>
     <label for="sort-by">Sort By:</label>
   <select id="sort-by" v-model="sortBy">
@@ -135,7 +136,8 @@ return(
         <option value="ascending">Ascending</option>
         <option value="descending">Descending</option>
     </select>
-</label>  
+</label>
+</div>  
 <p></p>
 <div id="lessons-container">
   <span v-for="lesson in filteredLessons" :key="lesson.subject">
@@ -179,7 +181,7 @@ return(
 
 <style>
 html, body{
-    background-color: antiquewhite;
+    background-color: oldlace;
 }
 
 h1{
@@ -193,10 +195,12 @@ text-align: center;
 
 
 #butnCart{
+    font-size: 1em;
     border: none;
     border-radius: 5px;
-    padding: 5px;
+    padding: 10px;
     background-color: aqua;
+     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
 
@@ -213,14 +217,29 @@ cursor: pointer;
 
 #sort{
     text-align: center;
+    background-color: lightgray;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    gap: 5px;
+    border-radius: 10px;
+    margin-top: 10px;
 }
 
 #lessons{
-    border: 1px solid black;
-    background-color: beige;
+    background-color: snow;
     margin: 10px;
-    padding: 10px;
+    padding: 30px 10px;
     border-radius: 8px;
+    text-align: center;
+    box-shadow: 5px 5px 7px grey;
+    transition: transform 0.2s ease-in-out
+}
+
+#lessons:hover{
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
 #searchinput{
@@ -234,6 +253,8 @@ cursor: pointer;
     padding: 3px 5px;
     background-color: aquamarine;
     border-radius: 4px;
+    margin-top: 5px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
 #cartbutn:hover{
