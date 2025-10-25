@@ -1,6 +1,6 @@
 <script setup>
 // We don't need 'ref' or 'computed' here if we only use props
-import { defineProps, defineEmits } from 'vue'; 
+// import { defineProps, defineEmits } from 'vue'; 
 
 // 1. Define Props (Data coming DOWN from App.vue)
 const props = defineProps({
@@ -11,7 +11,6 @@ const props = defineProps({
 });
 
 // 2. Define Emits (Actions going UP to App.vue)
-// We use 'update:' for v-model binding
 const emit = defineEmits(['remove-lesson', 'submit-order', 'update:customerName', 'update:customerPhone']);
 
 // 3. Functions to Emit Events (Tells the parent to run the function)
@@ -26,13 +25,26 @@ const submitOrder = () => {
     emit('submit-order'); // Passes no data, just tells parent to checkout
 };
 
+// 4. Input Handlers (NEW CODE HERE!)
+const updateName = (event) => {
+    // When text is typed, emit the 'update:customerName' event 
+    // and send the new value (event.target.value) up to the parent.
+    emit('update:customerName', event.target.value);
+}
+
+const updatePhone = (event) => {
+    // When text is typed, emit the 'update:customerPhone' event 
+    // and send the new value (event.target.value) up to the parent.
+    emit('update:customerPhone', event.target.value);
+}
+
 </script>
 
 <template>
         <h1>Checkout Page!</h1>
         <h4>Shopping cart: </h4>
         <div id="shoppingCart-container">
-        <p v-for="(lesson, index) in props.cart" :key="index">
+        <div v-for="(lesson, index) in props.cart" :key="index">
          <div id="checkCart">
             <b>Subject: </b>{{ lesson.subject }} <br>
             <b>Location: </b> {{ lesson.location }} <br>
@@ -40,7 +52,7 @@ const submitOrder = () => {
             <p></p>
             <button id="deletebutn" v-on:click="removeLesson(lesson, index)">delete</button>
         </div>
-        </p>
+    </div>
         </div>
         <div id="input-forms">
         <p>Name: <input type="text" :value="props.customerName" @input="updateName"></p>

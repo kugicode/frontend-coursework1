@@ -153,9 +153,6 @@ return(
             </div>
         </span>
         </div>
-        </div>
-
-        <div v-if="showProduct">
     </div>
 
 <ShoppingCartPage
