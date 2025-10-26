@@ -160,11 +160,12 @@ return(
     :cart="cart" 
     :customerName="customerName"
     :customerPhone="customerPhone"
-    :isFormValid="isFormValid" 
+    :isFormValid="isFormValid"
     @remove-lesson="remove"
     @submit-order="checkoutOrder"
     v-model:customerName="customerName"
     v-model:customerPhone="customerPhone"
+    @swith-page="changePage"
 />
 <!--put css on diffrent file-->
 </template>

@@ -7,11 +7,11 @@ const props = defineProps({
     cart: Array,
     customerName: String,
     customerPhone: String,
-    isFormValid: Boolean 
+    isFormValid: Boolean,
 });
 
 // 2. Define Emits (Actions going UP to App.vue)
-const emit = defineEmits(['remove-lesson', 'submit-order', 'update:customerName', 'update:customerPhone']);
+const emit = defineEmits(['remove-lesson', 'submit-order', 'update:customerName', 'update:customerPhone', 'swith-page']);
 
 // 3. Functions to Emit Events (Tells the parent to run the function)
 
@@ -38,9 +38,16 @@ const updatePhone = (event) => {
     emit('update:customerPhone', event.target.value);
 }
 
+const page = () => {
+
+    emit('swith-page');
+}
+
+
 </script>
 
 <template>
+     <button id="homebutn" v-on:click="page">back to home page</button>
         <h1>Checkout Page!</h1>
         <h4>Shopping cart: </h4>
         <div id="shoppingCart-container">
