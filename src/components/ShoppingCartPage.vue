@@ -55,7 +55,8 @@ const page = () => {
          <div id="checkCart">
             <b>Subject: </b>{{ lesson.subject }} <br>
             <b>Location: </b> {{ lesson.location }} <br>
-            <b>Price: {{ lesson.price }}</b> 
+            <b>Price: </b>  {{ lesson.price }}<br> 
+            <b>Quantity: </b> {{ lesson.quantity }}
             <p></p>
             <button id="deletebutn" v-on:click="removeLesson(lesson, index)">delete</button>
         </div>

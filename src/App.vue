@@ -1,6 +1,5 @@
 <script setup>
-import { ref } from 'vue';
-import { computed } from 'vue'; // imported ref so variables are reactive and computed for computed functions
+import { ref, computed, onMounted } from 'vue'; // imported ref so variables are reactive and computed for computed functions
 import './styles.css'
 import ShoppingCartPage from './components/ShoppingCartPage.vue';
 
@@ -12,34 +11,53 @@ const customerName = ref('');
 const customerPhone = ref('');
 const search = ref('');
 
-const lessons = ref([
-    { subject: "Maths", location: "London", price: 100, spaces: 5, icon: "fa-solid fa-calculator" }, //these are my lessons arrays in an object
-    { subject: "Science", location: "London", price: 50, spaces: 5, icon: "fa-solid fa-flask" },
-    { subject: "English", location: "London", price: 120, spaces: 5, icon: "fa-solid fa-pen" },
-    { subject: "History", location: "London", price: 45, spaces: 5, icon: "fa-solid fa-timeline" },
-    { subject: "Computing", location: "new barnet", price: 55, spaces: 5, icon: "fa-solid fa-computer" },
-    { subject: "Geography", location: "hendon", price: 66, spaces: 5, icon: "fa-solid fa-book-atlas" },
-    { subject: "Art and Design", location: "central london", price: 75, spaces: 5, icon: "fa-solid fa-paintbrush" },
-    { subject: "French", location: "North Finchley", price: 85, spaces: 5, icon: "fa-solid fa-language" },
-    { subject: "Music", location: "Edgware", price: 55, spaces: 5, icon: "fa-solid fa-music" },
-    { subject: "Religious studies", location: "hendon", price: 44, spaces: 5, icon: "fa-solid fa-kaaba" },
-]);
+const lessons = ref([]);
+
+const fetchLessons = async () => {
+    try{
+        //Fetch the data using the backend server's URL address
+        const response = await fetch('http://localhost:3000/lessons');
+
+        if(!response.ok){
+            throw new Error(`Failed to fetch lessons: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        lessons.value = data; //Update the lessons array with live data
+    }
+    catch(error){
+        console.error("Failed to fetch lessons:", error);
+    }
+};
+
+onMounted(() => {
+    fetchLessons();
+})
 
 const checkoutOrder = () => {
+    // This is where the POST request will go later
     console.log("click!")
-    // FIX: Replaced alert() with a console message and a simple non-blocking notification
     console.log("Order submitted!");
     alert("Order submitted!"); 
-    // I left the simple alert for immediate feedback, but remember this is bad practice!
-    // For a better app, you'd replace this with a modal or temporary message.
 }
 
-const remove = (lesson, index) => { //This function is for the delete button and removes an item in the list the adds it back to the lessons array
-    cart.value.splice(index, 1)
+// FIX 2: Updated remove function to decrease quantity and only remove the item if quantity is 0.
+const remove = (cartItem, index) => { 
+    // Decrease the quantity of the item in the cart
+    cartItem.quantity--;
+    
+    // Find the original lesson and increase its spaces (local simulation for now)
+    const originalLesson = lessons.value.find(l => l._id === cartItem._id); //Must use MongoDB's _id
+    if (originalLesson) {
+        originalLesson.spaces++;
+    }
+    
+    // If quantity hits zero, remove the item entirely from the cart array
+    if (cartItem.quantity === 0) {
+        cart.value.splice(index, 1);
+    }
 
-    lesson.spaces++;
-
-    console.log("The task has been deleted");
+    console.log("Item quantity reduced or deleted from cart.");
 }
 
 
@@ -47,14 +65,27 @@ const changePage = () => {
     showProduct.value = !showProduct.value; //changes the page once the shopping cart is clicked changes values by using the !.
 }
 
-const addToCart = (lesson) => { // This pushes a lesson to the reactive variable cart and reduces the lesson array space by 1
-    cart.value.push(lesson);
+// FIX 1: Updated addToCart logic to check for existing item and increase quantity.
+const addToCart = (lesson) => { 
+    // 1. Check if the lesson is already in the cart (by using the unique ID we added)
+    const existingItem = cart.value.find(item => item._id === lesson._id);
 
+    if (existingItem) {
+        // 2. If it exists, just increase the quantity
+        existingItem.quantity++;
+    } else {
+        // 3. If it's new, add it to the cart with a quantity of 1
+        // We use spread operator { ...lesson } to copy the lesson and add the new quantity property
+        cart.value.push({ ...lesson, quantity: 1 });
+    }
+
+    // 4. Reduce the lesson space (This logic remains the same)
     lesson.spaces--;
 }
 
-const itemsInTheCart = computed(() => { // this computed function returns the number of items in the cart and i used it on the shopping cart button to show the number!
-    return cart.value.length;
+const itemsInTheCart = computed(() => { 
+    // FIX 3: Calculate total items by summing the quantity of each cart item
+    return cart.value.reduce((total, item) => total + item.quantity, 0);
 })
 
 const sortedLessons = computed(() => {
@@ -77,16 +108,21 @@ const sortedLessons = computed(() => {
     return lessonsCopy
 })
 
+// FIX: Robust Validation Logic (This version allows spaces in the name and correctly checks phone)
 const isFormValid = computed(() => {
- 
-    const nameRegex = /^[a-zA-Z]+$/; //checks if there is a-z or capitalized alphabets!
+    const nameValue = customerName.value.trim();
+    const phoneValue = customerPhone.value.trim();
 
- const phoneRegex = /^[0-9]+$/; //checks only 0-9 numbers!
+    // 1. Check for illegal characters (anything BUT letters/spaces)
+    const hasInvalidNameChars = /[^a-zA-Z\s]/.test(nameValue);
+    // 2. Check for illegal characters (anything BUT numbers)
+    const hasInvalidPhoneChars = /[^0-9]/.test(phoneValue);
 
- const nameIsValid = nameRegex.test(customerName.value.trim());
- const phoneIsValid = phoneRegex.test(customerPhone.value.trim());
+    // Final check: Must have content, and NO invalid characters, and items in cart
+    const nameIsValid = nameValue.length > 0 && !hasInvalidNameChars;
+    const phoneIsValid = phoneValue.length > 0 && !hasInvalidPhoneChars;
 
- return nameIsValid && phoneIsValid && cart.value.length > 0; // if all these are true the the function returns true!
+    return nameIsValid && phoneIsValid && cart.value.length > 0;
 })
 
 const filteredLessons = computed(() => {
@@ -112,7 +148,6 @@ return(
 </script>
 
 <template>
-    <!-- FIX: Added Font Awesome CDN link here so your icons show up -->
     <h1>Lessons shop</h1>
     <div id="button-search">
     <button id="butnCart" v-if="itemsInTheCart > 0" v-on:click="changePage">Shopping cart: {{ itemsInTheCart }}</button>
