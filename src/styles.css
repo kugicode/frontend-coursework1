@@ -133,11 +133,13 @@ h4{
 
 
 #deletebutn{
+    font-size: 24px;
     border: none;
     margin-bottom: 5px;
-    padding: 4px 8px;
+    padding: 10px 20px;
     border-radius: 4px;
     background-color: rgb(255, 111, 111);
+    margin: 0px 10px;
 }
 
 #deletebutn:hover{
@@ -190,3 +192,25 @@ cursor: pointer;
     background-color: aqua;
     transform: translateY(2px);
 }
+
+#addbutn{
+    font-size: 24px;
+    border: none;
+    padding: 10px 20px;
+    background-color: aquamarine;
+    border-radius: 4px;
+    margin-top: 5px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    margin: 0px 10px;
+}
+
+#addbutn:hover{
+ background-color: rgb(90, 182, 151);
+ cursor: pointer;
+}
+
+#addbutn:active{
+     background-color: aquamarine;
+     transform: translateY(2px);
+}
+

@@ -11,7 +11,7 @@ const props = defineProps({
 });
 
 // 2. Define Emits (Actions going UP to App.vue)
-const emit = defineEmits(['remove-lesson', 'submit-order', 'update:customerName', 'update:customerPhone', 'swith-page']);
+const emit = defineEmits(['remove-lesson', 'submit-order', 'update:customerName', 'update:customerPhone', 'swith-page', 'add-lesson']);
 
 // 3. Functions to Emit Events (Tells the parent to run the function)
 
@@ -19,6 +19,10 @@ const emit = defineEmits(['remove-lesson', 'submit-order', 'update:customerName'
 const removeLesson = (lesson, index) => {
     emit('remove-lesson', lesson, index); // Passes the lesson and index up
 };
+
+const addLesson = (lesson) => {
+    emit('add-lesson', lesson);
+}
 
 // This function is triggered by the 'Checkout' button
 const submitOrder = () => {
@@ -58,7 +62,9 @@ const page = () => {
             <b>Price: </b>  {{ lesson.price }}<br> 
             <b>Quantity: </b> {{ lesson.quantity }}
             <p></p>
-            <button id="deletebutn" v-on:click="removeLesson(lesson, index)">delete</button>
+            <button id="deletebutn" v-on:click="removeLesson(lesson, index)">-</button>
+            <button id="addbutn" v-on:click="addLesson(lesson)">+</button>
+          
         </div>
     </div>
         </div>

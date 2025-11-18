@@ -32,14 +32,88 @@ const fetchLessons = async () => {
 
 onMounted(() => {
     fetchLessons();
-})
+});
 
-const checkoutOrder = () => {
-    // This is where the POST request will go later
-    console.log("click!")
-    console.log("Order submitted!");
-    alert("Order submitted!"); 
-}
+const checkoutOrder = async () => {
+    // Check if the form is valid (mandatory check)
+    if (!isFormValid.value) {
+        alert("Please ensure all fields are valid and the cart is not empty.");
+        return;
+    }
+    
+        //Prepare data struture for the POST request
+        const orderDetails = {
+            name: customerName.value,
+            phone: customerPhone.value,
+            //Send cart data with necessary _id and quantity for the backend
+            cart: cart.value.map(item => ({
+                _id: item._id,
+                quantity: item.quantity
+            }))
+        };
+        try{
+            const postResponse = await fetch('http://localhost:3000/order', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(orderDetails)
+            });
+            if(!postResponse.ok){
+                throw new Error(`Failed to save order: ${postResponse.statusText}`)
+            }
+
+          const updatePromise = cart.value.map(async (item) => {
+            const lesson = lessons.value.find(l => l._id === item._id);
+            if(lesson){
+                //Calculate the new spaces remaining
+                const newSpaces = lesson.spaces;
+
+                //Send PUT request to update only the spaces field
+                await fetch(`http://localhost:3000/lessons/${item._id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({spaces: newSpaces})
+                });
+            }
+          });
+
+          //Wait for ALL the PUT requests to complete before proceeding
+          await Promise.all(updatePromise);
+
+          //Final success
+          alert("Order submitted successfully and spaces have been updated");
+
+            //Clean up the form data locally
+            cart.value = [];
+            customerName.value = '';
+            customerPhone.value = '';
+
+            fetchLessons();
+
+        }
+
+        catch(error){
+            console.error("Order POST failed", error)
+            alert("Order failed to save. Check server connecction and console for details.");
+        }
+    }
+
+    const addLesson = (cartItem) => {
+        //Find the original lesson in the main list to check available spaces! we use _id becuase mongoDB uses _!
+        const originalLesson = lessons.value.find(l => l._id === cartItem._id);
+
+        //Check if we found it and spaces are available!
+        if(originalLesson && originalLesson.spaces > 0){
+            originalLesson.spaces--;
+
+            cartItem.quantity++;
+        }
+        else{
+            alert("Sorry there is no spaces left!");
+        }
+
+        // console.log("Added to lessons!");
+    }
+
 
 // FIX 2: Updated remove function to decrease quantity and only remove the item if quantity is 0.
 const remove = (cartItem, index) => { 
@@ -197,6 +271,7 @@ return(
     :customerPhone="customerPhone"
     :isFormValid="isFormValid"
     @remove-lesson="remove"
+    @add-lesson="addLesson"
     @submit-order="checkoutOrder"
     v-model:customerName="customerName"
     v-model:customerPhone="customerPhone"
