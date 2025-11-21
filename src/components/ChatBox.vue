@@ -1,0 +1,56 @@
+<script setup>
+import { ref } from 'vue';
+
+const isOpen = ref(false);
+const userInput = ref('');
+const messages = ref([
+{sender: 'bot', text: "Hello!"}
+]);
+
+const toggleChat = () => {
+    isOpen.value = !isOpen.value
+    console.log(isOpen.value);
+}
+
+const sendMessage = async () => {
+    if(!userInput.value.trim()){
+        return;
+    }
+// 1. Add User Message to Chat Array
+const text = userInput.value;
+messages.value.push({ sender: 'user', text: text });
+userInput.value = '';
+
+    //fetching the data from the backend
+    try{
+    const response = await fetch('http://localhost:3000/chat', { 
+        method: 'POST',
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: text})
+    });
+
+    const data = await response.json();
+
+    messages.value.push({sender: 'bot', text: data.reply});
+
+    }
+    catch(error){
+
+    }
+}
+
+</script>
+
+<template>
+<h3>Chatbot</h3>
+<button v-on:click="toggleChat">Click me!</button>
+<div v-if="isOpen">
+    <div>Chatbot</div>
+    <button v-on:click="toggleChat">Click me</button>
+    <div v-for="(msg, index) in messages">
+        {{ msg.text }}
+    </div>
+    <input type="text" v-model="userInput" @keyup.enter="sendMessage" placeholder="Ask me something!">
+    <button v-on:click="sendMessage">Send</button>
+</div>
+</template>

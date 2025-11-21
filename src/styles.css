@@ -118,13 +118,11 @@ h4{
  padding: 10px 0px;
 }
 
-#shoppingCart-container{
+#shoppingCart-container {
     display: grid;
-    /* This is the key responsive part:
-       auto-fit creates as many columns as possible.
-       minmax(250px, 1fr) ensures columns are never smaller than 250px, 
-       but stretch equally (1fr) to fill the row. */
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+    /* FIX: Changed 'auto-fit' to 'auto-fill'. 
+       This stops a single item from stretching to fill the entire row. */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
     gap: 25px; 
     max-width: 1200px; 
     margin: 0 auto;

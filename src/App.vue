@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'; // imported ref so variables are reactive and computed for computed functions
 import './styles.css'
 import ShoppingCartPage from './components/ShoppingCartPage.vue';
+import ChatBox from './components/ChatBox.vue';
 
 const cart = ref([]);
 const sortBy = ref('subject');
@@ -277,5 +278,6 @@ return(
     v-model:customerPhone="customerPhone"
     @swith-page="changePage"
 />
+<ChatBox />
 <!--put css on diffrent file-->
 </template>
