@@ -25,7 +25,7 @@ userInput.value = '';
     try{
     const response = await fetch('http://localhost:3000/chat', { 
         method: 'POST',
-        headers: {"Content-Type": "application/json"},
+        headers: {"Content-Type": "application/json"},  
         body: JSON.stringify({message: text})
     });
 
@@ -42,15 +42,34 @@ userInput.value = '';
 </script>
 
 <template>
-<h3>Chatbot</h3>
-<button v-on:click="toggleChat">Click me!</button>
-<div v-if="isOpen">
-    <div>Chatbot</div>
-    <button v-on:click="toggleChat">Click me</button>
-    <div v-for="(msg, index) in messages">
-        {{ msg.text }}
+    <button class="chat-toggle" @click="toggleChat">
+        <img v-if="!isOpen" src="http://localhost:3000/images/bot.webp" alt="chat" class="bot-icon">
+        <span v-else>❌</span>
+    </button>
+
+    <div v-if="isOpen" class="chat-window">
+        <div class="chat-header">
+            <h3>Chatbot</h3>
+        </div>
+
+        <div class="chat-messages">
+            <div 
+                v-for="(msg, index) in messages" 
+                :key="index" 
+                :class="['message', msg.sender]"
+            >
+                {{ msg.text }}
+            </div>
+        </div>
+
+        <div class="chat-input">
+            <input 
+                type="text" 
+                v-model="userInput" 
+                @keyup.enter="sendMessage" 
+                placeholder="Ask me something..."
+            >
+            <button @click="sendMessage">Send</button>
+        </div>
     </div>
-    <input type="text" v-model="userInput" @keyup.enter="sendMessage" placeholder="Ask me something!">
-    <button v-on:click="sendMessage">Send</button>
-</div>
 </template>
