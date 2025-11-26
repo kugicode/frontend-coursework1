@@ -23,7 +23,7 @@ userInput.value = '';
 
     //fetching the data from the backend
     try{
-    const response = await fetch('http://localhost:3000/chat', { 
+    const response = await fetch('https://backend-coursework1.onrender.com/chat', { 
         method: 'POST',
         headers: {"Content-Type": "application/json"},  
         body: JSON.stringify({message: text})
@@ -43,7 +43,7 @@ userInput.value = '';
 
 <template>
     <button class="chat-toggle" @click="toggleChat">
-        <img v-if="!isOpen" src="http://localhost:3000/images/bot.webp" alt="chat" class="bot-icon">
+        <img v-if="!isOpen" src="https://backend-coursework1.onrender.com/images/bot.webp" alt="chat" class="bot-icon">
         <span v-else>❌</span>
     </button>
 

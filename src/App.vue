@@ -17,7 +17,7 @@ const lessons = ref([]);
 const fetchLessons = async () => {
     try{
         //Fetch the data using the backend server's URL address
-        const response = await fetch('http://localhost:3000/lessons');
+        const response = await fetch('https://backend-coursework1.onrender.com/lessons');
 
         if(!response.ok){
             throw new Error(`Failed to fetch lessons: ${response.statusText}`);
@@ -53,7 +53,7 @@ const checkoutOrder = async () => {
             }))
         };
         try{
-            const postResponse = await fetch('http://localhost:3000/order', {
+            const postResponse = await fetch('https://backend-coursework1.onrender.com/order', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(orderDetails)
@@ -69,7 +69,7 @@ const checkoutOrder = async () => {
                 const newSpaces = lesson.spaces;
 
                 //Send PUT request to update only the spaces field
-                await fetch(`http://localhost:3000/lessons/${item._id}`, {
+                await fetch(`https://backend-coursework1.onrender.com/lessons/${item._id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({spaces: newSpaces})
