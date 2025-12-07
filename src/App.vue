@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'; // imported ref so variables are reactive and computed for computed functions
+import { ref, computed, onMounted, watch } from 'vue'; // imported ref so variables are reactive and computed for computed functions
 import './styles.css'
 import ShoppingCartPage from './components/ShoppingCartPage.vue';
 import ChatBox from './components/ChatBox.vue';
@@ -14,26 +14,37 @@ const search = ref('');
 
 const lessons = ref([]);
 
-const fetchLessons = async () => {
-    try{
-        //Fetch the data using the backend server's URL address
-        const response = await fetch('https://backend-coursework1.onrender.com/lessons');
+// Updated fetchLessons function to handle search queries
+const fetchLessons = async (query = '') => {
+    try {
+        let url = 'https://backend-coursework1.onrender.com/lessons';
+        
+        // If there is a search query, switch to the search endpoint
+        if (query.trim()) {
+            url = `https://backend-coursework1.onrender.com/search?q=${encodeURIComponent(query)}`;
+        }
 
-        if(!response.ok){
+        const response = await fetch(url);
+
+        if (!response.ok) {
             throw new Error(`Failed to fetch lessons: ${response.statusText}`);
         }
 
         const data = await response.json();
-        lessons.value = data; //Update the lessons array with live data
-    }
-    catch(error){
+        lessons.value = data; // The backend now returns exactly what we need!
+    } catch (error) {
         console.error("Failed to fetch lessons:", error);
     }
 };
 
+// Watcher: Runs fetchLessons every time you type
+watch(search, (newTerm) => {
+    fetchLessons(newTerm);
+});
+
 onMounted(() => {
     fetchLessons();
-});
+}); //onMounted triggers fetchLessons only when the html page is fully rendered!
 
 const checkoutOrder = async () => {
     // Check if the form is valid (mandatory check)
@@ -42,27 +53,27 @@ const checkoutOrder = async () => {
         return;
     }
     
-        //Prepare data struture for the POST request
-        const orderDetails = {
-            name: customerName.value,
-            phone: customerPhone.value,
-            //Send cart data with necessary _id and quantity for the backend
-            cart: cart.value.map(item => ({
-                _id: item._id,
-                quantity: item.quantity
-            }))
-        };
-        try{
-            const postResponse = await fetch('https://backend-coursework1.onrender.com/order', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(orderDetails)
-            });
-            if(!postResponse.ok){
-                throw new Error(`Failed to save order: ${postResponse.statusText}`)
-            }
+    //Prepare data struture for the POST request
+    const orderDetails = {
+        name: customerName.value,
+        phone: customerPhone.value,
+        //Send cart data with necessary _id and quantity for the backend
+        cart: cart.value.map(item => ({
+            _id: item._id,
+            quantity: item.quantity
+        }))
+    };
+    try{
+        const postResponse = await fetch('https://backend-coursework1.onrender.com/order', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(orderDetails)
+        });
+        if(!postResponse.ok){
+            throw new Error(`Failed to save order: ${postResponse.statusText}`)
+        }
 
-          const updatePromise = cart.value.map(async (item) => {
+        const updatePromise = cart.value.map(async (item) => {
             const lesson = lessons.value.find(l => l._id === item._id);
             if(lesson){
                 //Calculate the new spaces remaining
@@ -75,45 +86,41 @@ const checkoutOrder = async () => {
                     body: JSON.stringify({spaces: newSpaces})
                 });
             }
-          });
+        });
 
-          //Wait for ALL the PUT requests to complete before proceeding
-          await Promise.all(updatePromise);
+        //Wait for ALL the PUT requests to complete before proceeding
+        await Promise.all(updatePromise);
 
-          //Final success
-          alert("Order submitted successfully and spaces have been updated");
+        //Final success
+        alert("Order submitted successfully and spaces have been updated");
 
-            //Clean up the form data locally
-            cart.value = [];
-            customerName.value = '';
-            customerPhone.value = '';
+        //Clean up the form data locally
+        cart.value = [];
+        customerName.value = '';
+        customerPhone.value = '';
 
-            fetchLessons();
+        fetchLessons();
 
-        }
-
-        catch(error){
-            console.error("Order POST failed", error)
-            alert("Order failed to save. Check server connecction and console for details.");
-        }
     }
-
-    const addLesson = (cartItem) => {
-        //Find the original lesson in the main list to check available spaces! we use _id becuase mongoDB uses _!
-        const originalLesson = lessons.value.find(l => l._id === cartItem._id);
-
-        //Check if we found it and spaces are available!
-        if(originalLesson && originalLesson.spaces > 0){
-            originalLesson.spaces--;
-
-            cartItem.quantity++;
-        }
-        else{
-            alert("Sorry there is no spaces left!");
-        }
-
-        // console.log("Added to lessons!");
+    catch(error){
+        console.error("Order POST failed", error)
+        alert("Order failed to save. Check server connecction and console for details.");
     }
+}
+
+const addLesson = (cartItem) => {
+    //Find the original lesson in the main list to check available spaces! we use _id becuase mongoDB uses _!
+    const originalLesson = lessons.value.find(l => l._id === cartItem._id);
+
+    //Check if we found it and spaces are available!
+    if(originalLesson && originalLesson.spaces > 0){
+        originalLesson.spaces--;
+        cartItem.quantity++;
+    }
+    else{
+        alert("Sorry there is no spaces left!");
+    }
+}
 
 
 // FIX 2: Updated remove function to decrease quantity and only remove the item if quantity is 0.
@@ -131,7 +138,6 @@ const remove = (cartItem, index) => {
     if (cartItem.quantity === 0) {
         cart.value.splice(index, 1);
     }
-
     console.log("Item quantity reduced or deleted from cart.");
 }
 
@@ -200,84 +206,60 @@ const isFormValid = computed(() => {
     return nameIsValid && phoneIsValid && cart.value.length > 0;
 })
 
-const filteredLessons = computed(() => {
-
-const lessonsToFilter = sortedLessons.value;
-const searched = search.value.toLowerCase().trim();
-
-if (!searched){
-    return lessonsToFilter;
-}
-
-return lessonsToFilter.filter(lesson => {
-return( 
-    lesson.subject.toLowerCase().includes(searched) ||
-    lesson.location.toLowerCase().includes(searched) ||
-    String(lesson.price).includes(searched) ||
-    String(lesson.spaces).includes(searched)
-)
-});
-
-});
-
 </script>
 
 <template>
     <h1>Lessons shop</h1>
     <div id="button-search">
-    <button id="butnCart" v-if="itemsInTheCart > 0" v-on:click="changePage">Shopping cart: {{ itemsInTheCart }}</button>
-    <button id="butnCart" v-else-if="itemsInTheCart === 0" disabled>Shopping cart: {{ itemsInTheCart }}</button>
-    
+        <button id="butnCart" v-if="itemsInTheCart > 0" v-on:click="changePage">Shopping cart: {{ itemsInTheCart }}</button>
+        <button id="butnCart" v-else-if="itemsInTheCart === 0" disabled>Shopping cart: {{ itemsInTheCart }}</button>
     </div>
-   <div v-if="showProduct">
-    <div id = "sort">
-    <p>Search: <input id="searchinput" type="text" v-model="search"></p>
-    <label for="sort-by">Sort By:</label>
-  <select id="sort-by" v-model="sortBy">
-    <option value="subject">Subject</option>
-    <option value="location">Location</option>
-    <option value="price">Price</option>
-    <option value="spaces">Spaces available</option>
-  </select>
 
-<label for="direction-by">Sort Direction:
-    <select id="direction-by" v-model="sortDirection">
-        <option value="ascending">Ascending</option>
-        <option value="descending">Descending</option>
-    </select>
-</label>
-</div>  
-<p></p>
-<div id="lessons-container">
-  <span v-for="lesson in filteredLessons" :key="lesson.subject">
-            <div id="lessons">
-            <span>Subject: {{ lesson.subject }}</span>
-            <br>
-            <span>Location: {{ lesson.location }} </span>
-            <br>
-            <span>Price: {{ lesson.price }}</span>
-            <br>
-            <span>Spaces: {{ lesson.spaces }}</span>
-            <i id="icons" v-bind:class="lesson.icon"></i>
-            <button id="cartbutn" v-on:click="addToCart(lesson)" :disabled="lesson.spaces === 0">Add to cart</button>
-            </div>
-        </span>
+    <div v-if="showProduct">
+        <div id="sort">
+            <p>Search: <input id="searchinput" type="text" v-model="search"></p>
+            <label for="sort-by">Sort By:</label>
+            <select id="sort-by" v-model="sortBy">
+                <option value="subject">Subject</option>
+                <option value="location">Location</option>
+                <option value="price">Price</option>
+                <option value="spaces">Spaces available</option>
+            </select>
+
+            <label for="direction-by">Sort Direction:
+                <select id="direction-by" v-model="sortDirection">
+                    <option value="ascending">Ascending</option>
+                    <option value="descending">Descending</option>
+                </select>
+            </label>
+        </div>
+        <p></p>
+        <div id="lessons-container">
+            <span v-for="lesson in sortedLessons" :key="lesson.subject">
+                <div id="lessons">
+                    <span>Subject: {{ lesson.subject }}</span><br>
+                    <span>Location: {{ lesson.location }} </span><br>
+                    <span>Price: {{ lesson.price }}</span><br>
+                    <span>Spaces: {{ lesson.spaces }}</span>
+                    <i id="icons" v-bind:class="lesson.icon"></i>
+                    <button id="cartbutn" v-on:click="addToCart(lesson)" :disabled="lesson.spaces === 0">Add to cart</button>
+                </div>
+            </span>
         </div>
     </div>
 
-<ShoppingCartPage
-    v-else
-    :cart="cart" 
-    :customerName="customerName"
-    :customerPhone="customerPhone"
-    :isFormValid="isFormValid"
-    @remove-lesson="remove"
-    @add-lesson="addLesson"
-    @submit-order="checkoutOrder"
-    v-model:customerName="customerName"
-    v-model:customerPhone="customerPhone"
-    @swith-page="changePage"
-/>
-<ChatBox />
-<!--put css on diffrent file-->
-</template>
+    <ShoppingCartPage
+        v-else
+        :cart="cart" 
+        :customerName="customerName"
+        :customerPhone="customerPhone"
+        :isFormValid="isFormValid"
+        @remove-lesson="remove"
+        @add-lesson="addLesson"
+        @submit-order="checkoutOrder"
+        v-model:customerName="customerName"
+        v-model:customerPhone="customerPhone"
+        @swith-page="changePage"
+    />
+    <ChatBox />
+    </template>

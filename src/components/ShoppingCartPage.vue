@@ -1,6 +1,5 @@
 <script setup>
 // We don't need 'ref' or 'computed' here if we only use props
-// import { defineProps, defineEmits } from 'vue'; 
 
 // 1. Define Props (Data coming DOWN from App.vue)
 const props = defineProps({
@@ -29,7 +28,7 @@ const submitOrder = () => {
     emit('submit-order'); // Passes no data, just tells parent to checkout
 };
 
-// 4. Input Handlers (NEW CODE HERE!)
+// 4. Input Handlers
 const updateName = (event) => {
     // When text is typed, emit the 'update:customerName' event 
     // and send the new value (event.target.value) up to the parent.
